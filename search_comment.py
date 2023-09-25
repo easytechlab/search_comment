@@ -6,7 +6,7 @@ import os
 import sys
 
 # Fonction pour rechercher le mot-clé dans les commentaires
-async def get_comments(video_id, search_term, output_text):
+async def get_comments(video_id, search_term, output_text, username):
     async with TikTokApi() as api:
         await api.create_sessions(num_sessions=1, sleep_after=3)
         video = api.video(id=video_id)
@@ -14,7 +14,7 @@ async def get_comments(video_id, search_term, output_text):
         async for comment in video.comments(count=100):
             if search_term.lower() in comment.text.lower():
                 output_text.insert(tk.END, f"{comment.text}\n")
-                output_text.insert(tk.END, f"https://www.tiktok.com/@scrowhacking/video/{video_id}\n\n")
+                output_text.insert(tk.END, f"https://www.tiktok.com/@{username}/video/{video_id}\n\n")
                 found = True
         return found
 
@@ -27,9 +27,10 @@ def read_video_ids(filename):
 def search_videos():
     search_term = search_entry.get()
     video_ids = read_video_ids(file_entry.get())
+    username = username_entry.get()  # Obtenir le nom d'utilisateur
     
     for video_id in video_ids:
-        found = asyncio.run(get_comments(video_id, search_term, output_text))
+        found = asyncio.run(get_comments(video_id, search_term, output_text, username))
         if found:
             output_text.insert(tk.END, f"Mot-clé trouvé dans la vidéo {video_id}\n\n")
         else:
@@ -58,6 +59,12 @@ file_label.pack()
 file_entry = tk.Entry(root)
 file_entry.pack()
 
+username_label = tk.Label(root, text="Nom d'utilisateur TikTok:")
+username_label.pack()
+
+username_entry = tk.Entry(root)
+username_entry.pack()
+
 browse_button = tk.Button(root, text="Parcourir", command=browse_file)
 browse_button.pack()
 
@@ -68,3 +75,4 @@ output_text = tk.Text(root, height=10, width=50)
 output_text.pack()
 
 root.mainloop()
+
